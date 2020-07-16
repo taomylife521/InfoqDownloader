@@ -6,6 +6,8 @@ from selenium import webdriver
 import os
 from requestium import Session, Keys
 import time
+import csv
+
 
 from InfoQBrowserProxy import InfoQBrowserProxy
 

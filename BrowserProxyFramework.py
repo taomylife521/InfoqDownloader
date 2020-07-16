@@ -21,6 +21,9 @@ class BrowserProxyFramework(object):
     def process_response(self, response, request):
         pass
 
+    def loadallresponsecomplete(self, entrys):
+        pass
+
     def run(self, func, *args):
         self.proxy.new_har(options={
             'captureContent': True,
@@ -34,7 +37,7 @@ class BrowserProxyFramework(object):
             response = entry['response']
             self.process_request(request, response)
             self.process_response(response, request)
-
+        self.loadallresponsecomplete(result['log']['entries'])
     def __del__(self):
         self.proxy.close()
         self.browser.close()
