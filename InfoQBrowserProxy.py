@@ -2,6 +2,7 @@ from BrowserProxyFramework import BrowserProxyFramework
 import json
 import time
 import pandas as pd
+from ffmpy3 import FFmpeg
 import os
 
 detailList=[]
@@ -57,7 +58,7 @@ class InfoQBrowserProxy(BrowserProxyFramework):
 
     def load(self, url):
         self.browser.get(url)
-        time.sleep(1)
+        time.sleep(5)
 
     def loadList(self, url):
         self.browser.get(url)
@@ -89,7 +90,7 @@ class InfoQBrowserProxy(BrowserProxyFramework):
 
         videos=self.browser.find_elements_by_class_name('video-item')
         for videoItem in videos:
-            e=videoItem.find_element_by_xpath('//*[@id="layout"]/div[2]/div[2]/div[1]/div/div/div[1]/div[1]/div[2]/h6/a')
+            e=videoItem.find_element_by_class_name('com-article-title')
             self.videoList['uuid'].append(e.get_attribute('href'))
             self.videoList['article_title'].append(e.text)
 
@@ -145,10 +146,16 @@ class InfoQBrowserProxy(BrowserProxyFramework):
             for item in data['definition']:
                 if item['type'] in 'hd':
                     self.videoinfos['超清'].append(item['url'])
+                # else:
+                #     self.videoinfos['超清'].append('')
                 if item['type'] in 'sd':
                     self.videoinfos['高清'].append(item['url'])
+                # else:
+                #     self.videoinfos['高清'].append('')
                 if item['type'] in 'ld':
                     self.videoinfos['标清'].append(item['url'])
+                # else:
+                #     self.videoinfos['标清'].append('')
         #self.videoinfos = pd.DataFrame(data=self.videoinfos, columns=self.videoinfos.keys())
         #return self.videoinfos
 
@@ -167,9 +174,48 @@ class InfoQBrowserProxy(BrowserProxyFramework):
         self.videoList['uuid'].append(uuid)
         self.videoList['article_title'].append(article_title)
 
-
+    def ffmpeg_download(self,inputs_path, outputs_path):
+        try:
+            '''
+            :param inputs_path: 输入的文件传入字典格式{文件：操作}
+            :param outputs_path: 输出的文件传入字典格式{文件：操作}
+            :return:
+            '''
+            a = FFmpeg(
+                inputs={inputs_path: None},
+                outputs={outputs_path: '-c copy',
+                         }
+            )
+            print(a.cmd)
+            a.run()
+        except Exception:
+            pass
     def StartDownload(self,url):
-        self.run(self.loadList, "https://www.infoq.cn/video/list")
+        # 1.加载列表
+        # self.run(self.loadList, "https://www.infoq.cn/video/list")
+        # 2.加载详情，读取列表excel
+        # df = pd.read_excel(self.videoListfileName)  # 现在Excel表格与py代码放在一个文件夹里
+        # for item in df.values:
+        #     self.run(self.load, item[1])
+        # print(self.videoinfos)
+        # self.videoinfos = pd.DataFrame(data=self.videoinfos, columns=self.videoinfos.keys())
+        # self.videoinfos.to_excel(self.fileName)
+        # 3.下载视频
+        df = pd.read_excel(self.fileName)  # 现在Excel表格与py代码放在一个文件夹里
+        for item in df.values:
+            title=item[2]
+            hd=item[6]
+            if(hd == None):
+                continue
+            print(title + ":" + hd)
+            outputpath= "./Video/" + title + ".mp4"
+            outputpath =outputpath.replace(" ", "").replace("|", "#")
+            if not os.path.exists(outputpath):
+                self.ffmpeg_download(inputs_path=hd,outputs_path=outputpath)
+            print(outputpath+" DownLoad Sucess")
+
+            #self.run(self.load, item[1])
+
 
 
 

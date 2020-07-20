@@ -25,19 +25,23 @@ class BrowserProxyFramework(object):
         pass
 
     def run(self, func, *args):
-        self.proxy.new_har(options={
-            'captureContent': True,
-            'captureHeaders': True
-        })
-        func(*args)
-        result = self.proxy.har
-        #print(result)
-        for entry in result['log']['entries']:
-            request = entry['request']
-            response = entry['response']
-            self.process_request(request, response)
-            self.process_response(response, request)
-        self.loadallresponsecomplete(result['log']['entries'])
+        try:
+            self.proxy.new_har(options={
+                'captureContent': True,
+                'captureHeaders': True
+            })
+            func(*args)
+            result = self.proxy.har
+            #print(result)
+            for entry in result['log']['entries']:
+                request = entry['request']
+                response = entry['response']
+                self.process_request(request, response)
+                self.process_response(response, request)
+            self.loadallresponsecomplete(result['log']['entries'])
+        except Exception:
+            print("Super Exception")
+
     def __del__(self):
         self.proxy.close()
         self.browser.close()
@@ -45,8 +49,3 @@ class BrowserProxyFramework(object):
 
 
 
-if __name__ == '__main__':
-    f = MovieFramework()
-    for page in range(1, 5):
-        url = f'https://dynamic2.scrape.center/page/{page}'
-        f.run(f.load, url)

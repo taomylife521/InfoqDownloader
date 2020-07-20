@@ -158,7 +158,7 @@ def ExtractUrl():
 
 if __name__ == '__main__':
     infoDownloader=InfoQBrowserProxy()
-    infoDownloader.Login('13716910787','soulcoder@')
+    #infoDownloader.Login('13716910787','soulcoder@')
     #infoDownloader.run(infoDownloader.load,"https://www.infoq.cn/video/list")
     infoDownloader.StartDownload("https://www.infoq.cn/video/list")
 
